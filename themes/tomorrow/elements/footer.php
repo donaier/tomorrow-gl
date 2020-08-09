@@ -4,6 +4,9 @@
   <div class="text-center">
     <p>tomorrow glarus</p>
   </div>
+  <a href="/index.php/dashboard/calendar/events" class="text-right">
+    Kalenderverwaltung
+  </a>
 </footer>
 
 
