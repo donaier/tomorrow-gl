@@ -79,7 +79,7 @@ class Controller extends BlockController
     $event = new CalendarEvent($calendar);
     $eventVersion = $eventService->getVersionToModify($event, $u);
     $eventVersion->setName('-- offene Anfrage --');
-    $eventVersion->setDescription('');
+    $eventVersion->setDescription('Für diesen Termin wurde schon eine Anfrage erstellt.');
     
     $repetitions[] = new CalendarEventVersionRepetition($eventVersion, $pdEntity);
     $eventService->addEventVersion($event, $calendar, $eventVersion, $repetitions);
