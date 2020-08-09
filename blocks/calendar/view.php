@@ -71,7 +71,7 @@ if ($c->isEditMode()) {
         $(function() {
             $('#cal-month-list').fullCalendar({
                 header: {
-                    left: 'prev,next today',
+                    left: 'prev,next',
                     center: '',
                     right: 'title'
                 },

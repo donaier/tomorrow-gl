@@ -4,6 +4,8 @@
   $calendar = Concrete\Core\Calendar\Calendar::getByID($calendar_id);
 ?>
 
+<h2 class="text-center new-entry-title">Neue Anfrage für den Raum:</h2>
+
 <form method="post" action="<?= $view->action('new_entry') ?>" class="needs-validation">
   <div class="row">
     <div class="col col-sm-12 col-lg-6">

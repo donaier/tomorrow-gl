@@ -1,0 +1,22 @@
+header {
+  border-bottom: 8px solid @accent;
+  margin-bottom: 4rem;
+
+  .main-logo {
+    background-image: url(../../images/tomorrow.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    
+    height: 180px;
+    margin: 20px 0;
+  }
+  
+  @media all and (max-width: @screen-xs-max) {
+    margin-bottom: 2rem;
+
+    .main-logo {
+      height: 55px;
+    }
+  }
+}
