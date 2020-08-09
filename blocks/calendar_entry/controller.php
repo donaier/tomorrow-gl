@@ -93,7 +93,7 @@ class Controller extends BlockController
     // unapproved version to display in the frontend
     $eventVersion = $eventService->getVersionToModify($event, $u);
     $eventVersion->setName($title);
-    $eventVersion->setDescription($author . $comment);
+    $eventVersion->setDescription('Von: ' . $author . '<br/>' . $comment);
     
     $eventService->addEventVersion($event, $calendar, $eventVersion, $repetitions);
     $eventService->generateDefaultOccurrences($eventVersion);
