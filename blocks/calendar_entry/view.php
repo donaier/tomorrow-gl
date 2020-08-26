@@ -42,7 +42,7 @@
         <input type="text" name="title" class="form-control" placeholder="Titel:" required/>
       </div>
       <div class="form-group">
-        <textarea name="comment" class="form-control" placeholder="Beschreibung:" required></textarea>
+        <textarea name="comment" class="form-control" placeholder="Beschreibung:<?="\n"?>bitte Kontaktinfos (Telefon/Email) angeben" required></textarea>
       </div>
     </div>
   </div>

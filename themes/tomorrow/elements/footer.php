@@ -2,7 +2,7 @@
 
 <footer id="footer-theme">
   <div class="text-center">
-    <p>tomorrow glarus</p>
+    <p>raum tomorrow</p>
   </div>
   <a href="/index.php/dashboard/calendar/events" class="text-right">
     Kalenderverwaltung
