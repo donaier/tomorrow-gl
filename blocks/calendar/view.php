@@ -16,7 +16,7 @@ if ($c->isEditMode()) {
     <script>
         $(function() {
             $('#cal-month').fullCalendar({
-                dateFormat: 'H:mm',
+                timeFormat: 'H:mm',
                 header: {
                     left: 'prev,next today',
                     center: '',
@@ -71,7 +71,7 @@ if ($c->isEditMode()) {
 
         $(function() {
             $('#cal-month-list').fullCalendar({
-                dateFormat: 'H:mm',
+                timeFormat: 'H:mm',
                 header: {
                     left: 'prev,next',
                     center: '',
