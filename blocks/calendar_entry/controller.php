@@ -68,40 +68,59 @@ class Controller extends BlockController
     $dateStart = date('Y-m-d H:i:s', strtotime($start_date));
     $dateEnd = date('Y-m-d H:i:s', strtotime($end_date));
 
-    if (strtotime($end_date) - strtotime($start_date) > 1140) {
+    if (strtotime($end_date) - strtotime($start_date) < 1140) {
       $_SESSION['err'] = "Eine halbe Stunde darfs schon sein. Das ist ein zu kurzer Termin.";
+      // $_SESSION['err'] .= strtotime($end_date) - strtotime($start_date);
       header("Location: /#hook");
       exit();
     }
 
-    $pd = new EventRepetition();
-    $pd->setTimezone($timezone);
-    $pd->setStartDateAllDay(0);
-    $pd->setStartDate($dateStart);
-    $pd->setEndDate($dateEnd);
-    $pd->setRepeatPeriod($pd::REPEAT_NONE);
-    $pdEntity = new CalendarEventRepetition($pd);
+    // $pd = new EventRepetition();
+    // $pd->setTimezone($timezone);
+    // $pd->setStartDateAllDay(0);
+    // $pd->setStartDate($dateStart);
+    // $pd->setEndDate($dateEnd);
+    // $pd->setRepeatPeriod($pd::REPEAT_NONE);
+    // $pdEntity = new CalendarEventRepetition($pd);
+    //
+    // $event = new CalendarEvent($calendar);
+    // $eventVersion = $eventService->getVersionToModify($event, $u);
+    // $eventVersion->setName('-- offene Anfrage --');
+    // $eventVersion->setDescription('Für diesen Termin wurde schon eine Anfrage erstellt.');
+    //
+    // $repetitions[] = new CalendarEventVersionRepetition($eventVersion, $pdEntity);
+    // $eventService->addEventVersion($event, $calendar, $eventVersion, $repetitions);
+    // $eventService->generateDefaultOccurrences($eventVersion);
+    //
+    // $pkr = new ApproveCalendarEventRequest();
+    // $pkr->setCalendarEventVersionID($eventVersion->getID());
+    // $pkr->setRequesterUserID($u->getUserID());
+    // $response = $pkr->trigger();
+    //
+    // // unapproved version to display in the frontend
+    // $eventVersion = $eventService->getVersionToModify($event, $u);
+    // $eventVersion->setName($title);
+    // $eventVersion->setDescription('Von: ' . $author . '<br/>' . $comment);
+    //
+    // $eventService->addEventVersion($event, $calendar, $eventVersion, $repetitions);
+    // $eventService->generateDefaultOccurrences($eventVersion);
 
-    $event = new CalendarEvent($calendar);
-    $eventVersion = $eventService->getVersionToModify($event, $u);
-    $eventVersion->setName('-- offene Anfrage --');
-    $eventVersion->setDescription('Für diesen Termin wurde schon eine Anfrage erstellt.');
+    $this->notify();
+  }
 
-    $repetitions[] = new CalendarEventVersionRepetition($eventVersion, $pdEntity);
-    $eventService->addEventVersion($event, $calendar, $eventVersion, $repetitions);
-    $eventService->generateDefaultOccurrences($eventVersion);
+  function notify() {
+    $mailService = Core::make('mail');
+    $mailService->setTesting(true);
+    // $mailService->setBodyHTML("<p>ayoo</p>");
+    $mailService->load('template', 'tomorrow');
 
-    $pkr = new ApproveCalendarEventRequest();
-    $pkr->setCalendarEventVersionID($eventVersion->getID());
-    $pkr->setRequesterUserID($u->getUserID());
-    $response = $pkr->trigger();
+    $mailContent = '<p>Neuer Eintrag</p>';
+    $mailService->addParameter('mailContent', $mailContent);
 
-    // unapproved version to display in the frontend
-    $eventVersion = $eventService->getVersionToModify($event, $u);
-    $eventVersion->setName($title);
-    $eventVersion->setDescription('Von: ' . $author . '<br/>' . $comment);
+    $mailService->setSubject('Neuer Eintrag');
+    $mailService->from('info@tomorrow-gl.ch', 'Tomorrow-gl');
 
-    $eventService->addEventVersion($event, $calendar, $eventVersion, $repetitions);
-    $eventService->generateDefaultOccurrences($eventVersion);
+    $mailService->to('alcatraz@gmx.ch');
+    $mailService->sendMail();
   }
 }
