@@ -55,7 +55,7 @@ class Controller extends BlockController
     $title = $this->post()['title'];
     $comment = $this->post()['comment'];
 
-      
+
     $calendar = Calendar::getByID($this->calendar_id);
     $eventService = $app->make(EventService::class);
     $u = User::getByUserID(1);
@@ -67,7 +67,13 @@ class Controller extends BlockController
 
     $dateStart = date('Y-m-d H:i:s', strtotime($start_date));
     $dateEnd = date('Y-m-d H:i:s', strtotime($end_date));
-    
+
+    if (strtotime($end_date) - strtotime($start_date) > 1140) {
+      $_SESSION['err'] = "Eine halbe Stunde darfs schon sein. Das ist ein zu kurzer Termin.";
+      header("Location: /#hook");
+      exit();
+    }
+
     $pd = new EventRepetition();
     $pd->setTimezone($timezone);
     $pd->setStartDateAllDay(0);
@@ -75,16 +81,16 @@ class Controller extends BlockController
     $pd->setEndDate($dateEnd);
     $pd->setRepeatPeriod($pd::REPEAT_NONE);
     $pdEntity = new CalendarEventRepetition($pd);
-    
+
     $event = new CalendarEvent($calendar);
     $eventVersion = $eventService->getVersionToModify($event, $u);
     $eventVersion->setName('-- offene Anfrage --');
     $eventVersion->setDescription('Für diesen Termin wurde schon eine Anfrage erstellt.');
-    
+
     $repetitions[] = new CalendarEventVersionRepetition($eventVersion, $pdEntity);
     $eventService->addEventVersion($event, $calendar, $eventVersion, $repetitions);
     $eventService->generateDefaultOccurrences($eventVersion);
-    
+
     $pkr = new ApproveCalendarEventRequest();
     $pkr->setCalendarEventVersionID($eventVersion->getID());
     $pkr->setRequesterUserID($u->getUserID());
@@ -94,7 +100,7 @@ class Controller extends BlockController
     $eventVersion = $eventService->getVersionToModify($event, $u);
     $eventVersion->setName($title);
     $eventVersion->setDescription('Von: ' . $author . '<br/>' . $comment);
-    
+
     $eventService->addEventVersion($event, $calendar, $eventVersion, $repetitions);
     $eventService->generateDefaultOccurrences($eventVersion);
   }

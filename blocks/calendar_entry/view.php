@@ -4,9 +4,14 @@
   $calendar = Concrete\Core\Calendar\Calendar::getByID($calendar_id);
 ?>
 
-<h2 class="text-center new-entry-title">Neue Anfrage für den Raum:</h2>
+<h2 class="text-center new-entry-title" id="hook">Neue Anfrage für den Raum:</h2>
 
 <form method="post" action="<?= $view->action('new_entry') ?>" class="needs-validation">
+  <?php if(isset($_SESSION['err'])) { ?>
+    <div class="alert alert-warning" role="alert">
+      <?= $_SESSION['err']; ?>
+    </div>
+  <?php unset($_SESSION['err']); } ?>
   <div class="row">
     <div class="col col-sm-12 col-lg-6">
       <div class="row form-group">
@@ -46,7 +51,7 @@
       </div>
     </div>
   </div>
-  
+
   <div class="col text-center">
     <button class="btn btn-primary">
       Anfragen
