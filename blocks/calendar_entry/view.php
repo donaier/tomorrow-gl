@@ -1,6 +1,7 @@
 <?php defined('C5_EXECUTE') or die(_("Access Denied.")) ?>
 
 <?php
+  $app = Concrete\Core\Support\Facade\Application::getFacadeApplication();
   $calendar = Concrete\Core\Calendar\Calendar::getByID($calendar_id);
 ?>
 
@@ -19,7 +20,8 @@
           <label class="control-label" for="start_date">Wann:</label>
         </div>
         <div class="col col-xs-10">
-          <input type="date" name="date" class="form-control" required/>
+          <!-- <input type="date" name="date" class="form-control" required/> -->
+          <?= $app->make('helper/form/date_time')->date('date', date("Y-m-d"), true, ['required' => true]) ?>
         </div>
       </div>
 
@@ -52,6 +54,11 @@
     </div>
   </div>
 
+  <?php
+    $captcha = Core::make('captcha');
+    $captcha->showInput();
+  ?>
+
   <div class="col text-center">
     <button class="btn btn-primary">
       Anfragen
@@ -73,6 +80,7 @@
         form.classList.add('was-validated');
       }, false);
     });
+    $('#date_pub').attr('required', true);
   }, false);
 })();
 </script>

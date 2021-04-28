@@ -48,64 +48,66 @@ class Controller extends BlockController
   public function action_new_entry($bID = false) {
     $app = \Concrete\Core\Support\Facade\Application::getFacadeApplication();
 
-    $category = 'new_request';
-    $start_date = $this->post()['date'] . ' ' . $this->post()['start_time'];
-    $end_date = $this->post()['date'] . ' ' . $this->post()['end_time'];
-    $author = $this->post()['author'];
-    $title = $this->post()['title'];
-    $comment = $this->post()['comment'];
+    if ($this->post()['date'] && $this->post()['author'] && $this->post()['title']) {
+      $category = 'new_request';
+      $start_date = $this->post()['date'] . ' ' . $this->post()['start_time'];
+      $end_date = $this->post()['date'] . ' ' . $this->post()['end_time'];
+      $author = $this->post()['author'];
+      $title = $this->post()['title'];
+      $comment = $this->post()['comment'];
 
 
-    $calendar = Calendar::getByID($this->calendar_id);
-    $eventService = $app->make(EventService::class);
-    $u = User::getByUserID(1);
-    $timezone = $calendar->getSite()->getConfigRepository()->get('timezone');
-    if (!$timezone) {
-        $timezone = date_default_timezone_get();
+      $calendar = Calendar::getByID($this->calendar_id);
+      $eventService = $app->make(EventService::class);
+      $u = User::getByUserID(1);
+      $timezone = $calendar->getSite()->getConfigRepository()->get('timezone');
+      if (!$timezone) {
+          $timezone = date_default_timezone_get();
+      }
+      $timezone = new \DateTimeZone($timezone);
+
+      $dateStart = date('Y-m-d H:i:s', strtotime($start_date));
+      $dateEnd = date('Y-m-d H:i:s', strtotime($end_date));
+
+      if (strtotime($end_date) - strtotime($start_date) < 1140) {
+        $_SESSION['err'] = "Eine halbe Stunde darfs schon sein. Das ist ein zu kurzer Termin.";
+        // $_SESSION['err'] .= strtotime($end_date) - strtotime($start_date);
+        header("Location: /#hook");
+        exit();
+      }
     }
-    $timezone = new \DateTimeZone($timezone);
 
-    $dateStart = date('Y-m-d H:i:s', strtotime($start_date));
-    $dateEnd = date('Y-m-d H:i:s', strtotime($end_date));
+    $pd = new EventRepetition();
+    $pd->setTimezone($timezone);
+    $pd->setStartDateAllDay(0);
+    $pd->setStartDate($dateStart);
+    $pd->setEndDate($dateEnd);
+    $pd->setRepeatPeriod($pd::REPEAT_NONE);
+    $pdEntity = new CalendarEventRepetition($pd);
+    
+    $event = new CalendarEvent($calendar);
+    $eventVersion = $eventService->getVersionToModify($event, $u);
+    $eventVersion->setName('-- offene Anfrage --');
+    $eventVersion->setDescription('Für diesen Termin wurde schon eine Anfrage erstellt.');
+    
+    $repetitions[] = new CalendarEventVersionRepetition($eventVersion, $pdEntity);
+    $eventService->addEventVersion($event, $calendar, $eventVersion, $repetitions);
+    $eventService->generateDefaultOccurrences($eventVersion);
+    
+    $pkr = new ApproveCalendarEventRequest();
+    $pkr->setCalendarEventVersionID($eventVersion->getID());
+    $pkr->setRequesterUserID($u->getUserID());
+    $response = $pkr->trigger();
+    
+    // unapproved version to display in the frontend
+    $eventVersion = $eventService->getVersionToModify($event, $u);
+    $eventVersion->setName($title);
+    $eventVersion->setDescription('Von: ' . $author . '<br/>' . $comment);
+    
+    $eventService->addEventVersion($event, $calendar, $eventVersion, $repetitions);
+    $eventService->generateDefaultOccurrences($eventVersion);
 
-    if (strtotime($end_date) - strtotime($start_date) < 1140) {
-      $_SESSION['err'] = "Eine halbe Stunde darfs schon sein. Das ist ein zu kurzer Termin.";
-      // $_SESSION['err'] .= strtotime($end_date) - strtotime($start_date);
-      header("Location: /#hook");
-      exit();
-    }
-
-    // $pd = new EventRepetition();
-    // $pd->setTimezone($timezone);
-    // $pd->setStartDateAllDay(0);
-    // $pd->setStartDate($dateStart);
-    // $pd->setEndDate($dateEnd);
-    // $pd->setRepeatPeriod($pd::REPEAT_NONE);
-    // $pdEntity = new CalendarEventRepetition($pd);
-    //
-    // $event = new CalendarEvent($calendar);
-    // $eventVersion = $eventService->getVersionToModify($event, $u);
-    // $eventVersion->setName('-- offene Anfrage --');
-    // $eventVersion->setDescription('Für diesen Termin wurde schon eine Anfrage erstellt.');
-    //
-    // $repetitions[] = new CalendarEventVersionRepetition($eventVersion, $pdEntity);
-    // $eventService->addEventVersion($event, $calendar, $eventVersion, $repetitions);
-    // $eventService->generateDefaultOccurrences($eventVersion);
-    //
-    // $pkr = new ApproveCalendarEventRequest();
-    // $pkr->setCalendarEventVersionID($eventVersion->getID());
-    // $pkr->setRequesterUserID($u->getUserID());
-    // $response = $pkr->trigger();
-    //
-    // // unapproved version to display in the frontend
-    // $eventVersion = $eventService->getVersionToModify($event, $u);
-    // $eventVersion->setName($title);
-    // $eventVersion->setDescription('Von: ' . $author . '<br/>' . $comment);
-    //
-    // $eventService->addEventVersion($event, $calendar, $eventVersion, $repetitions);
-    // $eventService->generateDefaultOccurrences($eventVersion);
-
-    $this->notify();
+    // $this->notify();
   }
 
   function notify() {
